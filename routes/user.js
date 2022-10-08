@@ -3,6 +3,17 @@ const userController = require("../controllers/user");
 
 const router = express.Router();
 
-//router.'method'('url', memberController.'modulename');
+const asyncWrap = (controller) => {
+    return async (req, res, next) => {
+        try {
+            await controller(req, res)
+        } 
+        catch (err) {
+            next(err)
+        }
+    }
+};
+
+router.post('/login', asyncWrap(userController.login));
 
 module.exports = router;
