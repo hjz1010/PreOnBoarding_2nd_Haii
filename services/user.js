@@ -43,7 +43,7 @@ const login = async (account, password) => {
     throw error;
   }
   // 토큰 완료시간 1시간으로 설정
-  const accessToken = jwt.sign({ user_id: user.id }, secretKey, {
+  const accessToken = jwt.sign({ user_id: user.id, type_id: user.type_id }, secretKey, {
     expiresIn: "1h",
   });
   // 리프레시 토큰은 만료시간 14일
