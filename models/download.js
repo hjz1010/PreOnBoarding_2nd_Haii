@@ -29,21 +29,46 @@ const getUserData = async () => {
   return result;
 };
 
-//특정 지역 유저 가져오기
-// const getFilteredUserData = async (userInfo) => {
-//   const result = JSON.parse(
-//     JSON.stringify(
-//       await myDataSource.query(`SELECT * FROM user_data WHERE region = ? `, [
-//         userInfo,
-//       ]),
-//     ),
-//   );
-//   return result;
-// };
-
 //센터 전체 정보 가져오기
 const getFullCenterData = async () => {
   const result = JSON.parse(JSON.stringify(await myDataSource.query(`SELECT * FROM center_data`)));
+  return result;
+};
+
+//필터 쿼리문으로 변환
+const filterToQuery = async (filter) => {
+  let filterArr = [];
+  console.log(filter.type);
+  if (filter.type) {
+    filterArr.push(`type = \'${filter.type}\'`);
+  }
+  if (filter.name) {
+    filterArr.push(`name LIKE \'%${filter.name}%\'`);
+  }
+  if (filter.rep) {
+    filterArr.push(`operater_representative LIKE \'%${filter.rep}%\'`);
+  }
+  if (filter.contact) {
+    filterArr.push(`operater_contact LIKE \'%${filter.contact}%\'`);
+  }
+  if (filter.doctor && filter.doctor != 0) {
+    filterArr.push(`doctor_count >= ${filter.doctor}`);
+  }
+  if (filter.nurse && filter.nurse != 0) {
+    filterArr.push(`nurse_count >= ${filter.nurse}`);
+  }
+  if (filter.social && filter.social != 0) {
+    filterArr.push(`social_worker_count >= ${filter.social}`);
+  }
+  const result = filterArr.join(" AND ");
+  return result;
+};
+
+//센터 전체 검색된 정보 가져오기
+const getFilteredFullCenterData = async (filter) => {
+  const filterQuery = await filterToQuery(filter);
+  let sql = "SELECT * FROM center_data WHERE ";
+  const result = JSON.parse(JSON.stringify(await myDataSource.query(sql.concat(filterQuery))));
   return result;
 };
 
@@ -55,11 +80,11 @@ const getCenterDataByRegion = async (userInfo) => {
   return result;
 };
 
-//특정 지역의 검색된 센터 정보 가져오기  ---------수정필요
-const getFilteredCenterData = async (userInfo) => {
-  const result = JSON.parse(
-    JSON.stringify(await myDataSource.query(`SELECT * FROM center_data WHERE provider_name = ?`, [userInfo])),
-  );
+//특정 지역의 검색된 센터 정보 가져오기
+const getFilteredCenterData = async (userInfo, filter) => {
+  const filterQuery = await filterToQuery(filter);
+  let sql = "SELECT * FROM (SELECT * FROM center_data WHERE provider_name = ?) AS data WHERE ";
+  const result = JSON.parse(JSON.stringify(await myDataSource.query(sql.concat(filterQuery), [userInfo])));
   return result;
 };
 
@@ -67,8 +92,8 @@ module.exports = {
   getUserTypeByUserId,
   getUserInfoByUserId,
   getUserData,
-  //getFilteredUserData,
   getFullCenterData,
+  getFilteredFullCenterData,
   getCenterDataByRegion,
   getFilteredCenterData,
 };

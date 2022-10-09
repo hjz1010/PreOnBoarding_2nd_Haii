@@ -21,6 +21,15 @@ const fullDownload = async () => {
   return;
 };
 
+//전체 - 검색된 데이터 (대표 관리자)
+const filterFullDownload = async (filter) => {
+  let data = {};
+  data.users = await downloadDao.getUserData();
+  data.centers = await downloadDao.getFilteredFullCenterData(filter);
+  await jsonToExcel(data);
+  return;
+};
+
 // 담당지역 데이터 (지역담당자)
 const regionDownload = async (userId) => {
   const userInfo = await downloadDao.getUserInfoByUserId(userId);
@@ -31,16 +40,20 @@ const regionDownload = async (userId) => {
 };
 
 // 담당지역-검색된 데이터 (지역담당자)
-const filterDownload = async (userId) => {
+const filterRegionDownload = async (userId, filter) => {
   const userInfo = await downloadDao.getUserInfoByUserId(userId);
   let data = {};
-  data.centers = await downloadDao.getFilteredCenterData(userInfo);
+  data.centers = await downloadDao.getFilteredCenterData(userInfo, filter);
   await jsonToExcel(data);
   return;
 };
 
 //데이터 엑셀 파일로 변환
 const jsonToExcel = async (data) => {
+  if (!data.centers[0]) {
+    throw new BaseError("검색 결과가 없습니다.", 200);
+  }
+
   //엑셀파일 생성
   const workbook = new Excel.Workbook();
 
@@ -68,33 +81,6 @@ const jsonToExcel = async (data) => {
     workSheet.getCell("A1").alignment = { horizontal: "left" };
     workSheet.getCell("A1").font = { size: 14, bold: true };
   };
-
-  //유저 시트 생성
-  if (data.users) {
-    const userSheet = workbook.addWorksheet("users", {
-      views: [{ state: "frozen", xSplit: 1, ySplit: 1 }],
-    });
-
-    userSheet.columns = [
-      {
-        header: "No.",
-        key: "id",
-        width: 4,
-        style: { alignment: { horizontal: "center" } },
-      },
-      { header: "아이디", key: "account", width: 16 },
-      { header: "이름", key: "name", width: 8 },
-      { header: "연락처", key: "contact", width: 14 },
-      { header: "직급", key: "type", width: 14 },
-      { header: "담당지역", key: "region", width: 18 },
-      { header: "담당지역코드", key: "region_code", width: 12 },
-      { header: "갱신일", key: "updated_at", width: 18 },
-      { header: "생성일", key: "created_at", width: 18 },
-    ];
-    userSheet.addRows(data.users);
-    setHeader("users");
-    addTitle("users", "전국 치매 센터 관리자 명단");
-  }
 
   //센터 시트 생성
   const centerSheet = workbook.addWorksheet("centers", {
@@ -135,6 +121,33 @@ const jsonToExcel = async (data) => {
   setHeader("centers");
   addTitle("centers", "전국 치매 센터 목록");
 
+  //유저 시트 생성
+  if (data.users) {
+    const userSheet = workbook.addWorksheet("users", {
+      views: [{ state: "frozen", xSplit: 1, ySplit: 1 }],
+    });
+
+    userSheet.columns = [
+      {
+        header: "No.",
+        key: "id",
+        width: 4,
+        style: { alignment: { horizontal: "center" } },
+      },
+      { header: "아이디", key: "account", width: 16 },
+      { header: "이름", key: "name", width: 8 },
+      { header: "연락처", key: "contact", width: 14 },
+      { header: "직급", key: "type", width: 14 },
+      { header: "담당지역", key: "region", width: 18 },
+      { header: "담당지역코드", key: "region_code", width: 12 },
+      { header: "갱신일", key: "updated_at", width: 18 },
+      { header: "생성일", key: "created_at", width: 18 },
+    ];
+    userSheet.addRows(data.users);
+    setHeader("users");
+    addTitle("users", "전국 치매 센터 관리자 명단");
+  }
+
   //파일 생성
   await workbook.xlsx.writeFile("./public/download.xlsx").then();
   return;
@@ -143,6 +156,7 @@ const jsonToExcel = async (data) => {
 module.exports = {
   getUserType,
   fullDownload,
+  filterFullDownload,
   regionDownload,
-  filterDownload,
+  filterRegionDownload,
 };
