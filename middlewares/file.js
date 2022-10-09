@@ -7,6 +7,7 @@ const verifyToken = async (req, res, next) => {
   if (!token) {
     throw new BaseError("유저 인증이 필요합니다.", 403);
   } else {
+    const token = req.headers.authorization.split(' ')[1]   // token이 'Bearer eyhdks'로 들어와서 코드 추가함
     jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
       if (err) {
         throw new BaseError("인증에 실패하였습니다.", 403);
