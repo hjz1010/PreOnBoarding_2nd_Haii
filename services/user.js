@@ -30,7 +30,7 @@ const signUp = async (account, password, name, phone_number, type_id, region_id)
   }
 
   const checkExistRegionId = await userDao.getRegionById(region_id);
-  if (!checkExistRegionId) {
+  if (type_id === 2 && !checkExistRegionId) {
     throw new BaseError("존재하지 않는 지역ID 입니다.", 404);
   }
 
