@@ -32,16 +32,13 @@ const signUp = async (account, password, name, phone_number, type_id, region_id)
 const login = async (account, password) => {
   const user = await userDao.getUserByAccount(account);
   if (!user) {
-    const error = new Error("이메일과 비밀번호를 확인해주세요.");
-    error.statusCode = 400;
-    throw error;
+    throw new BaseError("이메일과 비밀번호를 확인해주세요.", 400);
+
   }
   const isPasswordCorrect = bcrypt.compareSync(password, user.password);
 
   if (!isPasswordCorrect) {
-    const error = new Error("이메일과 비밀번호를 확인해주세요.");
-    error.statusCode = 400;
-    throw error;
+    throw new BaseError("이메일과 비밀번호를 확인해주세요.", 400);
   }
   // 토큰 완료시간 1시간으로 설정
   const accessToken = jwt.sign({ user_id: user.id, type_id: user.type_id }, SECRET_KEY, {
