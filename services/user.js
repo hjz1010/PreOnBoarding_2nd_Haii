@@ -11,18 +11,27 @@ const signUp = async (account, password, name, phone_number, type_id, region_id)
   if (!account || !password || !name || !phone_number || !type_id) {
     throw new BaseError("입력된 값이 없는 항목이 있습니다.", 400);
   }
-  validationEmail(account); // 이메일형식 유효성 검사
-  validationPassword(password); // 비밀번호형식 유효성 검사
-  validationName(name); // 이름 유효성 검사
-  validationPhone(phone_number); // 휴대폰번호 유효성 검사
+  validationEmail(account);
+  validationPassword(password);
+  validationName(name);
+  validationPhone(phone_number);
 
-  const isExistAccount = await userDao.existCheckUserByAccount(account); // 가입여부 확인
+  const isExistAccount = await userDao.existCheckUserByAccount(account);
   if (isExistAccount) {
-    throw new Error("이미 존재하는 계정입니다", 400);
+    throw new BaseError("이미 존재하는 계정입니다", 400);
   }
 
   if (type_id === 1 && region_id) {
-    throw new Error("담당 지역 형식이 올바르지 않습니다.", 400); // type_id가 1인 경우 - 대표관리자 (담당지역없음)
+    throw new BaseError("담당 지역 형식이 올바르지 않습니다.", 400);
+  }
+
+  if (type_id > 2) {
+    throw new BaseError("존재하지 않는 유저타입 입니다.", 404);
+  }
+
+  const checkExistRegionId = await userDao.getRegionById(region_id);
+  if (!checkExistRegionId) {
+    throw new BaseError("존재하지 않는 지역ID 입니다.", 404);
   }
 
   const hashedPassword = await bcrypt.hash(password, 12);

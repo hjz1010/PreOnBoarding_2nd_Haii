@@ -38,7 +38,6 @@ const getFullCenterData = async () => {
 //필터 쿼리문으로 변환
 const filterToQuery = async (filter) => {
   let filterArr = [];
-  console.log(filter.type);
   if (filter.type) {
     filterArr.push(`type = \'${filter.type}\'`);
   }
