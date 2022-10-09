@@ -16,9 +16,14 @@ const inputCenterData = async (
   social_worker_count,
   others_count,
   program,
-  operating_institution_id,
-  management_institution_id,
-  provider_institution_id,
+  operating_institution_name,
+  operating_institution_representative,
+  operating_institution_contact,
+  operating_institution_consignment_date,
+  management_institution_name,
+  management_institution_contact,
+  provider_institution_code,
+  provider_institution_name,
 ) => {
   const inputData = await dataDao.inputCenterData(
     name,
@@ -35,9 +40,14 @@ const inputCenterData = async (
     social_worker_count,
     others_count,
     program,
-    operating_institution_id,
-    management_institution_id,
-    provider_institution_id,
+    operating_institution_name,
+    operating_institution_representative,
+    operating_institution_contact,
+    operating_institution_consignment_date,
+    management_institution_name,
+    management_institution_contact,
+    provider_institution_code,
+    provider_institution_name,
   );
   return inputData;
 };

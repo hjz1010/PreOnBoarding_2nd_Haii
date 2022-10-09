@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/shlee2227/PreOnBoarding_2nd_Haii.git#readme",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dbmate": "^1.0.3",
     "dotenv": "^16.0.3",
@@ -34,8 +33,10 @@
     "typeorm": "^0.3.10"
   },
   "devDependencies": {
+    "bcryptjs": "^2.4.3",
     "prettier": "^2.7.1",
     "swagger-jsdoc": "^6.2.5",
     "swagger-ui-express": "^4.5.0"
+
   }
 }
