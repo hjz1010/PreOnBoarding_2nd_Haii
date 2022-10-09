@@ -11,7 +11,8 @@ const verifyToken = async (req, res, next) => {
       if (err) {
         throw new BaseError("인증에 실패하였습니다.", 403);
       } else {
-        req.userId = decoded.userId;
+        req.userId = decoded.user_id;
+        req.userTypeId = decoded.type_id;
       }
     });
     if (!req.userId) {
