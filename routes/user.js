@@ -6,7 +6,7 @@ const middleware = require("../middlewares/file");
 const router = express.Router();
 
 router.post("/signUp", errorHandler(userController.signUp));
-router.post("/login", asyncWrap(userController.login));
+router.post("/login", errorHandler(userController.login));
 router.patch("/:userId", middleware.verifyToken, errorHandler(userController.updateUser)) ;
 
 module.exports = router;
