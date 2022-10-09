@@ -51,7 +51,7 @@ const filterRegionDownload = async (userId, filter) => {
 //데이터 엑셀 파일로 변환
 const jsonToExcel = async (data) => {
   if (!data.centers[0]) {
-    throw new BaseError("검색 결과가 없습니다.", 200);
+    throw new BaseError("검색 결과가 없습니다.", 404);
   }
 
   //엑셀파일 생성
