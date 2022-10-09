@@ -1,4 +1,5 @@
 const downloadService = require("../services/download");
+const { BaseError } = require("../middlewares/appError");
 
 const download = async (req, res) => {
   try {
@@ -8,12 +9,10 @@ const download = async (req, res) => {
       await downloadService.fullDownload();
       res.redirect("/download.xlsx");
     } else if (userType === 2) {
-      await downloadService.filterDownload(userId);
+      await downloadService.regionDownload(userId);
       res.redirect("/download.xlsx");
     } else {
-      let error = new Error("Error: 유저 유형이 올바르지 않습니다.");
-      error.code = 403;
-      throw error;
+      throw new BaseError("유저 유형이 올바르지 않습니다.", 403);
     }
   } catch (err) {
     console.log(err);
