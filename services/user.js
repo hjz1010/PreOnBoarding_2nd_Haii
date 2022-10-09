@@ -32,14 +32,14 @@ const signUp = async (account, password, name, phone_number, type_id, region_id)
 const login = async (account, password) => {
   const user = await userDao.getUserByAccount(account);
   if (!user) {
-    const error = new Error("이메일과 비밀번호를 확인해주세요.");
+    const error = new BaseError("이메일과 비밀번호를 확인해주세요.");
     error.statusCode = 400;
     throw error;
   }
   const isPasswordCorrect = bcrypt.compareSync(password, user.password);
 
   if (!isPasswordCorrect) {
-    const error = new Error("이메일과 비밀번호를 확인해주세요.");
+    const error = new BaseError("이메일과 비밀번호를 확인해주세요.");
     error.statusCode = 400;
     throw error;
   }
