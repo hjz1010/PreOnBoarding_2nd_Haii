@@ -11,7 +11,6 @@ const login = async (req, res) => {
 
   if (!account || !password) {
     return res.status(400).json({ message: "이메일과 비밀번호를 모두 입력해주세요." });
-
   }
   const token = await userService.login(account, password);
   res.status(200).json({ message: "로그인 성공!", token: token });
