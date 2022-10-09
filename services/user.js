@@ -42,7 +42,6 @@ const login = async (account, password) => {
   const user = await userDao.getUserByAccount(account);
   if (!user) {
     throw new BaseError("이메일과 비밀번호를 확인해주세요.", 400);
-
   }
   const isPasswordCorrect = bcrypt.compareSync(password, user.password);
 
