@@ -7,7 +7,7 @@ const signUp = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { account, password } = req.body.data;
+  const { account, password } = req.body;
 
   if (!account || !password) {
     res.status(400).json({ message: "이메일과 비밀번호를 모두 입력해주세요." });
