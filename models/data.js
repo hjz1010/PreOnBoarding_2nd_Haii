@@ -15,9 +15,14 @@ const inputCenterData = async (
   social_worker_count,
   others_count,
   program,
-  operating_institution_id,
-  management_institution_id,
-  provider_institution_id,
+  operating_institution_name,
+  operating_institution_representative,
+  operating_institution_contact,
+  operating_institution_consignment_date,
+  management_institution_name,
+  management_institution_contact,
+  provider_institution_code,
+  provider_institution_name,
 ) => {
   const inputData = await myDataSource.query(
     `
@@ -40,7 +45,12 @@ const inputCenterData = async (
       management_institution_id,
       provider_institution_id
       ) 
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      VALUES 
+        (?,?,?,?,?,?,?,?,?,?,?,?,?,?,
+        (SELECT id FROM operating_institutions WHERE name LIKE ? AND representative LIKE ? AND contact LIKE ? AND consignment_date LIKE ?),
+        (SELECT id FROM management_institutions WHERE name LIKE ? AND contact LIKE ?),
+        (SELECT id FROM provider_institutions WHERE institution_code LIKE ? AND name LIKE ?)
+        )
     `,
     [
       name,
@@ -57,9 +67,14 @@ const inputCenterData = async (
       social_worker_count,
       others_count,
       program,
-      operating_institution_id,
-      management_institution_id,
-      provider_institution_id,
+      operating_institution_name,
+      operating_institution_representative,
+      operating_institution_contact,
+      operating_institution_consignment_date,
+      management_institution_name,
+      management_institution_contact,
+      provider_institution_code,
+      provider_institution_name,
     ],
   );
   return inputData;
