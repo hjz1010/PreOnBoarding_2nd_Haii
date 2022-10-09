@@ -3,35 +3,26 @@ const dataFile = require("../data.json");
 const jwt = require("jsonwebtoken");
 
 const inputData = async (req, res) => {
-  const token = req.headers;
+  const token = req.headers["authorization"];
 
-  const hasKey = {
-    token: false,
-  };
-
-  /** 받아온 데이터에 키 + 벨류 값이 존재하는지 확인하는 코드 */
-  const requireKey = Object.keys(hasKey);
-
-  Object.entries(req.headers).forEach((keyValue) => {
-    const [key, value] = keyValue;
-    if (requireKey.includes(key) && value) {
-      hasKey[key] = true;
-    }
-  });
-
-  /** 받아온 데이터에 키 + 벨류 값이 없을때 에러를 표시해주는 코드*/
-  const hasKeyArray = Object.entries(hasKey);
-  for (let i = 0; i < hasKeyArray.length; i++) {
-    const [key, value] = hasKeyArray[i];
-    if (!value) {
-      res.status(400).json({ message: `${key}이/가 없습니다.` });
-      return;
+  if (!token) {
+    return res.status(403).json({ message: "유저 인증이 필요합니다." });
+  } else {
+    const token = req.headers.authorization.split(" ")[1];
+    jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: "인증에 실패하였습니다." });
+      } else {
+        req.userId = decoded.user_id;
+        req.userTypeId = decoded.type_id;
+      }
+    });
+    if (!req.userId) {
+      return res.status(400).json({ message: "유저가 존재하지 않습니다." });
     }
   }
 
-  const key = process.env.SECRET_KEY;
-  const token_id = jwt.verify(token, key);
-  const type_id = token_id.type_id;
+  const type_id = req.userTypeId;
 
   if (type_id !== 1) {
     res.status(403).json({ message: "데이터 접근 권한이 없습니다." });
@@ -52,9 +43,7 @@ const inputData = async (req, res) => {
       운영위탁일자: data[i].운영위탁일자,
     });
   }
-  operatingData = [...new Set(operatingData.map(JSON.stringify))].map(
-    JSON.parse,
-  );
+  operatingData = [...new Set(operatingData.map(JSON.stringify))].map(JSON.parse);
 
   for (i = 0; i < operatingData.length; i++) {
     const name = operatingData[i].운영기관명;
@@ -62,12 +51,7 @@ const inputData = async (req, res) => {
     const contact = operatingData[i].운영기관전화번호;
     const consignment_date = operatingData[i].운영위탁일자;
 
-    const inputOperatingData = await dataService.inputOperatingData(
-      name,
-      representative,
-      contact,
-      consignment_date,
-    );
+    const inputOperatingData = await dataService.inputOperatingData(name, representative, contact, consignment_date);
   }
 
   /** 관리기관부분 데이터 */
@@ -77,18 +61,13 @@ const inputData = async (req, res) => {
       관리기관전화번호: data[i].관리기관전화번호,
     });
   }
-  managementData = [...new Set(managementData.map(JSON.stringify))].map(
-    JSON.parse,
-  );
+  managementData = [...new Set(managementData.map(JSON.stringify))].map(JSON.parse);
 
   for (i = 0; i < managementData.length; i++) {
     const name = managementData[i].관리기관명;
     const contact = managementData[i].관리기관전화번호;
 
-    const inputManagementData = await dataService.inputManagementData(
-      name,
-      contact,
-    );
+    const inputManagementData = await dataService.inputManagementData(name, contact);
   }
   /** 제공기관부분 데이터 */
   for (i = 0; i < data.length; i++) {
@@ -103,10 +82,7 @@ const inputData = async (req, res) => {
     const institution_code = providerData[i].제공기관코드;
     const name = providerData[i].제공기관명;
 
-    const inputProviderData = await dataService.inputProviderData(
-      institution_code,
-      name,
-    );
+    const inputProviderData = await dataService.inputProviderData(institution_code, name);
   }
 
   for (i = 0; i < data.length; i++) {
@@ -124,12 +100,10 @@ const inputData = async (req, res) => {
     const social_worker_count = dataFile.records[i].사회복지사인원수;
     const others_count = dataFile.records[i].기타인원현황;
     const program = dataFile.records[i].주요치매관리프로그램소개;
-    const operating_institution_name = dataFile.records[i].운영기관대표자명;
-    const operating_institution_representative =
-      dataFile.records[i].운영기관대표자명;
+    const operating_institution_name = dataFile.records[i].운영기관명;
+    const operating_institution_representative = dataFile.records[i].운영기관대표자명;
     const operating_institution_contact = dataFile.records[i].운영기관전화번호;
-    const operating_institution_consignment_date =
-      dataFile.records[i].운영위탁일자;
+    const operating_institution_consignment_date = dataFile.records[i].운영위탁일자;
     const management_institution_name = dataFile.records[i].관리기관명;
     const management_institution_contact = dataFile.records[i].관리기관전화번호;
     const provider_institution_code = dataFile.records[i].제공기관코드;
