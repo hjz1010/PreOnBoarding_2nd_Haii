@@ -2,32 +2,12 @@ const downloadDao = require("../models/download");
 const Excel = require("exceljs");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
-
-const getUserId = async (token) => {
-  let userId;
-  jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
-    if (err) {
-      let error = new Error("Error: 인증에 실패하였습니다.");
-      error.code = 403;
-      throw error;
-    } else {
-      userId = decoded.userId;
-    }
-  });
-  if (!userId) {
-    let error = new Error("Error: 유저 아이디가 없습니다.");
-    error.code = 403;
-    throw error;
-  }
-  return userId;
-};
+const { BaseError } = require("../middlewares/appError");
 
 const getUserType = async (userId) => {
   const userType = await downloadDao.getUserTypeByUserId(userId);
   if (!userType) {
-    let error = new Error("Error: 유저 유형이 없습니다.");
-    error.code = 403;
-    throw error;
+    throw new BaseError("유저 유형이 없습니다.", 403);
   }
   return userType;
 };
@@ -41,11 +21,19 @@ const fullDownload = async () => {
   return;
 };
 
-// 검색 후 데이터 (지역담당자)
+// 담당지역 데이터 (지역담당자)
+const regionDownload = async (userId) => {
+  const userInfo = await downloadDao.getUserInfoByUserId(userId);
+  let data = {};
+  data.centers = await downloadDao.getCenterDataByRegion(userInfo);
+  await jsonToExcel(data);
+  return;
+};
+
+// 담당지역-검색된 데이터 (지역담당자)
 const filterDownload = async (userId) => {
   const userInfo = await downloadDao.getUserInfoByUserId(userId);
   let data = {};
-  //data.users = await downloadDao.getFilteredUserData(userInfo);
   data.centers = await downloadDao.getFilteredCenterData(userInfo);
   await jsonToExcel(data);
   return;
@@ -66,9 +54,7 @@ const jsonToExcel = async (data) => {
   const setHeader = async (sheetName) => {
     const workSheet = workbook.getWorksheet(sheetName);
     for (let i = 1; i <= workSheet.columnCount; i++) {
-      const headerEachCell = workSheet.getCell(
-        `${String.fromCharCode(i + 64)}1`,
-      );
+      const headerEachCell = workSheet.getCell(`${String.fromCharCode(i + 64)}1`);
       headerEachCell.alignment = { horizontal: "center" };
       headerEachCell.font = { bold: true };
     }
@@ -155,8 +141,8 @@ const jsonToExcel = async (data) => {
 };
 
 module.exports = {
-  getUserId,
   getUserType,
   fullDownload,
+  regionDownload,
   filterDownload,
 };

@@ -1,10 +1,11 @@
 const express = require("express");
-const middleware = require("../middlewares/file");
+const fileMiddleware = require("../middlewares/file");
 const downloadController = require("../controllers/download");
+const errorHandler = require("../middlewares/errorHandler");
 
 const router = express.Router();
 
-router.get("", middleware.verifyToken, downloadController.download);
+router.get("", errorHandler(fileMiddleware.verifyToken), errorHandler(downloadController.download));
 
 router.use((req, res, next) => {
   res.status(404).json("Not Found");
