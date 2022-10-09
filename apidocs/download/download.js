@@ -2,7 +2,7 @@
  * @swagger
  *
  * /download:
- *   put:
+ *   get:
  *    tags:
  *      - download
  *    summary: "데이터 다운로드 기능"
@@ -33,7 +33,7 @@
  *                    type: string
  *                    example: "검색 결과가 없습니다."
  * /download/search:
- *  put:
+ *  get:
  *    tags:
  *      - download
  *    summary: "데이터 다운로드 기능"
