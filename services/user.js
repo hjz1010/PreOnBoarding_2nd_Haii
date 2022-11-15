@@ -6,6 +6,7 @@ const ISSUER = process.env.ISSUER;
 
 const { validationEmail, validationPassword, validationName, validationPhone } = require("../utils/validation");
 const { BaseError } = require("../middlewares/appError");
+const req = require("express/lib/request");
 
 const signUp = async (account, password, name, phone_number, type_id, region_id) => {
   if (!account || !password || !name || !phone_number || !type_id) {
@@ -65,6 +66,26 @@ const login = async (account, password) => {
   return token;
 };
 
+const checkRefreshToken = async (access_token, refresh_token) => {
+  access_token = access_token.split(' ')[1]   
+    jwt.verify(access_token, process.env.SECRET_KEY, {ignoreExpiration: true}, (err, decoded) => {
+      if (err) {
+        throw new BaseError("인증에 실패하였습니다.", 403);
+      } else {
+      req.userId = decoded.user_id;
+      }
+    });
+    const user = await userDao.getUserByUserId(req.userId)
+    if ( user.refresh_token === refresh_token ) {
+      return jwt.sign({ user_id: user.id, type_id: user.type_id }, SECRET_KEY, {
+        expiresIn: "1h",
+        issuer: ISSUER,
+      });
+    } else {
+      throw new BaseError("재로그인이 필요합니다.", 400);
+    }
+}
+
 const checkUserExist = async (user_id) => {
   const user = await userDao.getUserByUserId(user_id);
   if (!user) {
@@ -120,4 +141,5 @@ module.exports = {
   updateName,
   updatePhone,
   updateRegion,
+  checkRefreshToken,
 };

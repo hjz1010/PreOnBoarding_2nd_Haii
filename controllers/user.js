@@ -16,6 +16,19 @@ const login = async (req, res) => {
   res.status(200).json({ message: "로그인 성공!", token: token });
 };
   
+const token = async (req, res) => {
+  const access_token = req.headers["authorization"];
+  const { refresh_token } = req.body;
+
+  if (!access_token || !refresh_token) {
+    return res.status(400).json({ message: "2개의 토큰이 필요합니다." })
+  }
+
+  const new_token = await userService.checkRefreshToken(access_token, refresh_token);
+  console.log("## new_token: ", new_token )
+  res.status(200).json({ message: "새로운 토큰 발행", new_token: new_token })
+}
+
 const updateUser = async (req, res) => {
   // 키값 : name, phone_number, region_id로 입력
   const user_type_id = req.userTypeId;
@@ -59,5 +72,6 @@ const updateUser = async (req, res) => {
 module.exports = {
   signUp,
   login,
-  updateUser
+  updateUser,
+  token
 };

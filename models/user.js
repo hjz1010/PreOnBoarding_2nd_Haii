@@ -64,7 +64,7 @@ const createRefreshToken = async (refreshToken, userId) => {
 
 const getUserByUserId = async (id) => {
   const [user] = await myDataSource.query(
-    `SELECT id FROM users WHERE id = ?`,
+    `SELECT * FROM users WHERE id = ?`,
     [id]
   );
   return user
